@@ -20,12 +20,12 @@
 </head>
 <body>
 <header>
-  <h1>Generador XML RDEP 2026 · Versión inicial para validar en SRI</h1>
+  <h1>Generador XML RDEP 2026 · Versión v4 para pruebas en validador SRI</h1>
   <div class="small">HTML + JavaScript · funciona sin servidor · listo para GitHub Pages</div>
 </header>
 <main>
   <section class="card warn">
-    Esta versión genera un XML base para prueba en el programa/validador RDEP del SRI. Si el validador devuelve errores de etiqueta, longitud o catálogo, se corrige el HTML con esos mensajes hasta que quede compatible.
+    Versión v4 para pruebas. Incluye datos de ejemplo, limpieza separada de empleador y empleado, y generación XML para iterar con los errores del validador SRI. El XML anterior fue rechazado; por eso esta herramienta debe ajustarse con cada mensaje del validador hasta que sea aceptada.
   </section>
 
   <section class="card">
@@ -34,7 +34,11 @@
       <div><label>RUC empleador *</label><input id="numRuc" maxlength="13" placeholder="0999999999001"></div>
       <div><label>Período fiscal *</label><input id="anio" value="2026" maxlength="4"></div>
       <div><label>Tipo de empleador *</label><select id="tipoEmpleador"><option>PRIVADO_MIXTO</option><option>PUBLICO</option></select></div>
-      <div><label>Ente seguridad social *</label><select id="segSoc"><option>IESS</option><option>ISSFA_ISSPOL</option></select></div>
+      <div><label>Ente seguridad social *</label><select id="enteSegSocial"><option>IESS</option><option>ISSFA_ISSPOL</option></select></div>
+    </div>
+    <div class="actions" style="margin-top:12px">
+      <button class="green" onclick="cargarEjemplo()">Cargar datos de ejemplo</button>
+      <button class="gray" onclick="borrarDatosEmpleador()">Borrar datos de empleador</button>
     </div>
   </section>
 
@@ -112,7 +116,7 @@
 
     <div class="actions" style="margin-top:12px">
       <button class="green" onclick="guardarTrabajador()">Agregar / actualizar trabajador</button>
-      <button class="gray" onclick="limpiarTrabajador()">Limpiar trabajador</button>
+      <button class="gray" onclick="borrarDatosEmpleado()">Borrar datos de empleado</button>
     </div>
   </section>
 
@@ -149,24 +153,144 @@ function showTab(name){['id','ing','gas','imp'].forEach(t=>{q('tab-'+t).classLis
 function calcularBase(){let ing=num('sueldosSalarios')+num('sobreSuelComRemu')+num('partUtil')+num('ingGravOtrosEmpl');q('basImp').value=money(ing-num('aportePersIess')-num('aportPersIessOtrosEmpls'));}
 function datosTrabajador(){let o={}; fields.forEach(f=>o[f]=moneyFields.includes(f)?money(num(f)):val(f)); o.ingGravConEsteEmpl=money(num('sueldosSalarios')+num('sobreSuelComRemu')+num('partUtil')); return o}
 function validarTrabajador(o){let e=[]; if(!o.idRet)e.push('Número ID'); if(!o.apellidoTrab)e.push('Apellidos'); if(!o.nombreTrab)e.push('Nombres'); if(!o.estab)e.push('Establecimiento'); return e}
-function guardarTrabajador(){let o=datosTrabajador(); let e=validarTrabajador(o); if(e.length){alert('Faltan campos: '+e.join(', ')); return} if(editIndex>=0){trabajadores[editIndex]=o; editIndex=-1}else trabajadores.push(o); persist(); limpiarTrabajador(); render()}
-function limpiarTrabajador(){fields.forEach(f=>{if(q(f)){ if(moneyFields.includes(f))q(f).value='0.00'; }}); ['idRet','apellidoTrab','nombreTrab'].forEach(f=>q(f).value=''); q('estab').value='001'; q('paisResidencia').value='593'; q('idDiscap').value='999'; q('tipoTrabajDiscap').value='01'; q('porcentajeDiscap').value='0'; editIndex=-1; showTab('id')}
+function guardarTrabajador(){let o=datosTrabajador(); let e=validarTrabajador(o); if(e.length){alert('Faltan campos: '+e.join(', ')); return} if(editIndex>=0){trabajadores[editIndex]=o; editIndex=-1}else trabajadores.push(o); persist(); borrarDatosEmpleado(); render()}
+function borrarDatosEmpleado(){fields.forEach(f=>{if(q(f)){ if(moneyFields.includes(f))q(f).value='0.00'; }}); ['idRet','apellidoTrab','nombreTrab'].forEach(f=>q(f).value=''); q('estab').value='001'; q('paisResidencia').value='593'; q('idDiscap').value='999'; q('tipoTrabajDiscap').value='01'; q('porcentajeDiscap').value='0'; editIndex=-1; showTab('id')}
 function editar(i){let o=trabajadores[i]; fields.forEach(f=>{if(q(f))q(f).value=o[f]??''}); editIndex=i; window.scrollTo({top:120,behavior:'smooth'}); showTab('id')}
 function eliminar(i){if(confirm('¿Eliminar trabajador?')){trabajadores.splice(i,1); persist(); render()}}
-function persist(){localStorage.setItem('rdep_trabajadores',JSON.stringify(trabajadores)); localStorage.setItem('rdep_empleador',JSON.stringify({numRuc:val('numRuc'),anio:val('anio'),tipoEmpleador:val('tipoEmpleador'),segSoc:val('segSoc')}))}
+function persist(){localStorage.setItem('rdep_trabajadores',JSON.stringify(trabajadores)); localStorage.setItem('rdep_empleador',JSON.stringify({numRuc:val('numRuc'),anio:val('anio'),tipoEmpleador:val('tipoEmpleador'),enteSegSocial:val('enteSegSocial')}))}
 function render(){q('count').textContent=trabajadores.length; let tb=q('tabla').querySelector('tbody'); tb.innerHTML=''; trabajadores.forEach((t,i)=>{tb.insertAdjacentHTML('beforeend',`<tr><td>${esc(t.idRet)}</td><td>${esc(t.apellidoTrab)} ${esc(t.nombreTrab)}</td><td class="right">${money(t.ingGravConEsteEmpl)}</td><td class="right">${money(t.basImp)}</td><td class="right">${money(t.valRet)}</td><td><button class="gray" onclick="editar(${i})">Editar</button><button class="red" onclick="eliminar(${i})">Eliminar</button></td></tr>`)}); persist()}
-function generarXML(descargar){persist(); if(!val('numRuc')||val('numRuc').length!==13){alert('Revisa el RUC: debe tener 13 dígitos.');return} if(!trabajadores.length){alert('Agrega al menos un trabajador.');return}
-let xml=`<?xml version="1.0" encoding="UTF-8"?>\n<rdep>\n  <numRuc>${esc(val('numRuc'))}</numRuc>\n  <anio>${esc(val('anio'))}</anio>\n  <tipoEmpleador>${esc(val('tipoEmpleador'))}</tipoEmpleador>\n  <segSoc>${esc(val('segSoc'))}</segSoc>\n  <retRelDep>\n`;
-trabajadores.forEach(t=>{xml+='  <datRetRelDep>\n';
-['benefGalap','enfCatastrofica','numCargasFam','tipIdRet','idRet','apellidoTrab','nombreTrab','estab','residenciaTrab','paisResidencia','aplicaConvenio','tipoTrabajDiscap','porcentajeDiscap','tipIdDiscap','idDiscap','sueldosSalarios','sobreSuelComRemu','partUtil','ingGravOtrosEmpl','impAsumidoEsteEmpl','decimTer','decimCuar','fondoReserva','salarioDigno','otrosIngRenGrav','ingGravConEsteEmpl','sistemaSalarioNeto','aportePersIess','aportPersIessOtrosEmpls','deducVivienda','deducSalud','deducEduca','deducAliement','deducVestim','deducTurismo','exoneraDisc','exoneraTerEd','basImp','impRentCaus','rebajaGastosPersonales','impRentaCausadoRebaja','valorRetenidoOtrosEmpleadores','valRet'].forEach(k=>xml+=tag(k,t[k]??'0')+'\n');
-// Campos de contribución solidaria 2016: se envían en cero para evitar vacíos cuando el esquema los conserva.
-['ingEsteEmplContri','ingOtrosEmplContri','exoContri','totIngContri','numMesTrabEsteEmplContri','numMesTrabOtrosEmplContri','numMesTrabContri','ingMensPromContri','numMesContriGenOtrosEmpl','numMesContriGenEsteEmpl','numMesContriGen','totContriGen','credTribDonContrOtrosEmpl','credTribDonContrEsteEmpl','credTribDonContrNoUtilEsteEmpl','credTribDonContr','contriPagar','contriAsumOtrosEmpl','contriRetenOtrosEmpl','contriAsumEsteEmpl','contriRetenEsteEmpl'].forEach(k=>xml+=tag(k,'0.00')+'\n');
-xml+='  </datRetRelDep>\n'}); xml+='  </retRelDep>\n</rdep>';
-q('xmlOut').value=xml; if(descargar){let blob=new Blob([xml],{type:'application/xml;charset=utf-8'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='RDEP_'+val('anio')+'.xml'; a.click(); URL.revokeObjectURL(a.href)} }
-function descargarJSON(){persist(); let data={empleador:{numRuc:val('numRuc'),anio:val('anio'),tipoEmpleador:val('tipoEmpleador'),segSoc:val('segSoc')},trabajadores}; let a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})); a.download='respaldo_RDEP_'+val('anio')+'.json'; a.click(); URL.revokeObjectURL(a.href)}
+function generarXML(descargar){
+  persist();
+  if(!val('numRuc')||val('numRuc').length!==13){alert('Revisa el RUC: debe tener 13 dígitos.');return}
+  if(!trabajadores.length){alert('Agrega al menos un trabajador.');return}
+
+  // Estructura corregida según errores del validador:
+  // rdep -> numRuc, anio, tipoEmpleador, enteSegSocial, retRelDep
+  // retRelDep -> datRetRelDep -> empleado + campos monetarios en orden del esquema.
+  let xml=`<?xml version="1.0" encoding="UTF-8"?>\n<rdep>\n`;
+  xml+=`  <numRuc>${esc(val('numRuc'))}</numRuc>\n`;
+  xml+=`  <anio>${esc(val('anio'))}</anio>\n`;
+  xml+=`  <tipoEmpleador>${esc(val('tipoEmpleador'))}</tipoEmpleador>\n`;
+  xml+=`  <enteSegSocial>${esc(val('enteSegSocial'))}</enteSegSocial>\n`;
+  xml+=`  <retRelDep>\n`;
+
+  trabajadores.forEach(t=>{
+    const ingGravConEsteEmpl = money((parseFloat(t.sueldosSalarios)||0)+(parseFloat(t.sobreSuelComRemu)||0)+(parseFloat(t.partUtil)||0));
+    const nodes = [
+      ['empleado', null],
+      ['suelSal', t.sueldosSalarios],
+      ['sobSuelComRemu', t.sobreSuelComRemu],
+      ['partUtil', t.partUtil],
+      ['intGrabGen', t.ingGravOtrosEmpl],
+      ['impRentEmpl', t.impAsumidoEsteEmpl],
+      ['decimTer', t.decimTer],
+      ['decimCuar', t.decimCuar],
+      ['fondoReserva', t.fondoReserva],
+      ['salarioDigno', t.salarioDigno],
+      ['otrosIngRenGrav', t.otrosIngRenGrav],
+      ['ingGravConEsteEmpl', ingGravConEsteEmpl],
+      ['sisSalNet', t.sistemaSalarioNeto],
+      ['apoPerIess', t.aportePersIess],
+      ['aporPerIessConOtrosEmpls', t.aportPersIessOtrosEmpls],
+      ['deducVivienda', t.deducVivienda],
+      ['deducSalud', t.deducSalud],
+      ['deducEducartcult', t.deducEduca],
+      ['deducAliement', t.deducAliement],
+      ['deducVestim', t.deducVestim],
+      ['deduccionTurismo', t.deducTurismo],
+      ['exoDiscap', t.exoneraDisc],
+      ['exoTerEd', t.exoneraTerEd],
+      ['basImp', t.basImp],
+      ['impRentCaus', t.impRentCaus],
+      ['rebajaGastosPersonales', t.rebajaGastosPersonales],
+      ['impuestoRentaRebajaGastosPersonales', t.impRentaCausadoRebaja],
+      ['valRetAsuOtrosEmpls', t.valorRetenidoOtrosEmpleadores],
+      ['valImpAsuEsteEmpl', t.impAsumidoEsteEmpl],
+      ['valRet', t.valRet]
+    ];
+    xml+='    <datRetRelDep>\n';
+    xml+='      <empleado>\n';
+    const empNodes = [
+      ['benGalpg', t.benefGalap || 'NO'],
+      ['enfcatastro', t.enfCatastrofica || 'NO'],
+      ['numCargRebGastPers', t.numCargasFam || '0'],
+      ['tipIdRet', t.tipIdRet],
+      ['idRet', t.idRet],
+      ['apellidoTrab', t.apellidoTrab],
+      ['nombreTrab', t.nombreTrab],
+      ['estab', t.estab || '001'],
+      ['residenciaTrab', t.residenciaTrab || '01'],
+      ['paisResidencia', t.paisResidencia || '593'],
+      ['aplicaConvenio', t.aplicaConvenio || 'NA'],
+      ['tipoTrabajDiscap', t.tipoTrabajDiscap || '01'],
+      ['porcentajeDiscap', String(parseInt(t.porcentajeDiscap||0,10)||0)],
+      ['tipIdDiscap', t.tipIdDiscap || 'N'],
+      ['idDiscap', t.idDiscap || '999']
+    ];
+    empNodes.forEach(([k,v])=>xml+=`        <${k}>${esc(v)}</${k}>\n`);
+    xml+='      </empleado>\n';
+    nodes.slice(1).forEach(([k,v])=>xml+=`      <${k}>${esc(v ?? '0.00')}</${k}>\n`);
+    xml+='    </datRetRelDep>\n';
+  });
+  xml+='  </retRelDep>\n</rdep>';
+  q('xmlOut').value=xml;
+  if(descargar){let blob=new Blob([xml],{type:'application/xml;charset=utf-8'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='RDEP_'+val('anio')+'.xml'; a.click(); URL.revokeObjectURL(a.href)}
+}
+
+function borrarDatosEmpleador(){
+  ['numRuc','anio'].forEach(f=>{ if(q(f)) q(f).value = (f==='anio' ? '2026' : ''); });
+  if(q('tipoEmpleador')) q('tipoEmpleador').value='PRIVADO_MIXTO';
+  if(q('enteSegSocial')) q('enteSegSocial').value='IESS';
+  localStorage.setItem('rdep_empleador', JSON.stringify({numRuc:'',anio:'2026',tipoEmpleador:'PRIVADO_MIXTO',enteSegSocial:'IESS'}));
+}
+// Alias de compatibilidad por si quedó alguna referencia anterior
+function limpiarEmpleador(){ borrarDatosEmpleador(); }
+function limpiarTrabajador(){ borrarDatosEmpleado(); }
+
+function cargarEjemplo(){
+  // Datos solo para pruebas en el validador. No significa que el XML esté aprobado por SRI.
+  q('numRuc').value='0909042681001';
+  q('anio').value='2026';
+  q('tipoEmpleador').value='PRIVADO_MIXTO';
+  q('enteSegSocial').value='IESS';
+
+  // Limpia la lista y carga un empleado de ejemplo para no digitar cada vez.
+  trabajadores=[];
+  fields.forEach(f=>{ if(q(f)){ q(f).value = moneyFields.includes(f) ? '0.00' : ''; }});
+  q('tipIdRet').value='C';
+  q('idRet').value='0702133323';
+  q('apellidoTrab').value='Gallardo Romero';
+  q('nombreTrab').value='Maria Cecilia';
+  q('estab').value='001';
+  q('residenciaTrab').value='01';
+  q('paisResidencia').value='593';
+  q('aplicaConvenio').value='NO';
+  q('tipoTrabajDiscap').value='01';
+  q('porcentajeDiscap').value='0';
+  q('tipIdDiscap').value='N';
+  q('idDiscap').value='999';
+  q('benefGalap').value='NO';
+  q('enfCatastrofica').value='00';
+  q('numCargasFam').value='0';
+  q('sueldosSalarios').value='475.00';
+  q('sistemaSalarioNeto').value='0';
+  q('aportePersIess').value='0.00';
+  q('basImp').value='0.00';
+  q('impRentCaus').value='0.00';
+  q('rebajaGastosPersonales').value='0.00';
+  q('impRentaCausadoRebaja').value='0.00';
+  q('valorRetenidoOtrosEmpleadores').value='0.00';
+  q('impAsumidoEsteEmpl').value='0.00';
+  q('valRet').value='0.00';
+  guardarTrabajador();
+  generarXML(false);
+  alert('Datos de ejemplo cargados. Ahora puedes generar XML y probarlo en el validador.');
+}
+
+function descargarJSON(){persist(); let data={empleador:{numRuc:val('numRuc'),anio:val('anio'),tipoEmpleador:val('tipoEmpleador'),enteSegSocial:val('enteSegSocial')},trabajadores}; let a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})); a.download='respaldo_RDEP_'+val('anio')+'.json'; a.click(); URL.revokeObjectURL(a.href)}
 function importarJSON(ev){let f=ev.target.files[0]; if(!f)return; let r=new FileReader(); r.onload=()=>{try{let d=JSON.parse(r.result); if(d.empleador){Object.keys(d.empleador).forEach(k=>{if(q(k))q(k).value=d.empleador[k]})} trabajadores=d.trabajadores||[]; persist(); render(); alert('Datos restaurados.')}catch(e){alert('No se pudo leer el respaldo JSON.')}}; r.readAsText(f)}
-function borrarTodo(){if(confirm('¿Borrar todos los datos guardados?')){trabajadores=[]; localStorage.removeItem('rdep_trabajadores'); localStorage.removeItem('rdep_empleador'); q('xmlOut').value=''; render()}}
-(function init(){let emp=JSON.parse(localStorage.getItem('rdep_empleador')||'{}'); Object.keys(emp).forEach(k=>{if(q(k))q(k).value=emp[k]}); render(); limpiarTrabajador();})();
+function borrarTodo(){if(confirm('¿Borrar todos los datos guardados?')){trabajadores=[]; localStorage.removeItem('rdep_trabajadores'); localStorage.removeItem('rdep_empleador'); borrarDatosEmpleador(); borrarDatosEmpleado(); q('xmlOut').value=''; render()}}
+(function init(){let emp=JSON.parse(localStorage.getItem('rdep_empleador')||'{}'); Object.keys(emp).forEach(k=>{if(q(k))q(k).value=emp[k]}); render(); borrarDatosEmpleado();})();
 </script>
 </body>
 </html>
