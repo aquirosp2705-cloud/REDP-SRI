@@ -20,12 +20,12 @@
 </head>
 <body>
 <header>
-  <h1>Generador XML RDEP 2026 · Versión v4 para pruebas en validador SRI</h1>
+  <h1>Generador XML RDEP 2026 · Versión v5 para pruebas en validador SRI</h1>
   <div class="small">HTML + JavaScript · funciona sin servidor · listo para GitHub Pages</div>
 </header>
 <main>
   <section class="card warn">
-    Versión v4 para pruebas. Incluye datos de ejemplo, limpieza separada de empleador y empleado, y generación XML para iterar con los errores del validador SRI. El XML anterior fue rechazado; por eso esta herramienta debe ajustarse con cada mensaje del validador hasta que sea aceptada.
+    Versión v5 para pruebas. Incluye datos de ejemplo, limpieza separada de empleador y empleado, y generación XML para iterar con los errores del validador SRI. El XML anterior fue rechazado; por eso esta herramienta debe ajustarse con cada mensaje del validador hasta que sea aceptada.
   </section>
 
   <section class="card">
@@ -66,8 +66,8 @@
         <div><label>Tipo ID sustituto</label><select id="tipIdDiscap"><option value="N">No aplica</option><option value="C">Cédula</option><option value="P">Pasaporte</option></select></div>
         <div><label>ID sustituto discapacidad</label><input id="idDiscap" value="999"></div>
         <div><label>Beneficio Galápagos</label><select id="benefGalap"><option value="NO">NO</option><option value="SI">SI</option></select></div>
-        <div><label>Enfermedad catastrófica/discapacidad cargo</label><select id="enfCatastrofica"><option value="00">00 - No</option><option value="01">01 - Sí</option></select></div>
-        <div><label>Cargas familiares</label><select id="numCargasFam"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        <div><label>Enfermedad catastrófica/discapacidad cargo</label><select id="enfCatastrofica"><option value="NO">NO</option><option value="SI">SI</option></select></div>
+        <div><label>Cargas familiares para rebaja</label><select id="numCargasFam"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
       </div>
     </div>
 
@@ -154,7 +154,7 @@ function calcularBase(){let ing=num('sueldosSalarios')+num('sobreSuelComRemu')+n
 function datosTrabajador(){let o={}; fields.forEach(f=>o[f]=moneyFields.includes(f)?money(num(f)):val(f)); o.ingGravConEsteEmpl=money(num('sueldosSalarios')+num('sobreSuelComRemu')+num('partUtil')); return o}
 function validarTrabajador(o){let e=[]; if(!o.idRet)e.push('Número ID'); if(!o.apellidoTrab)e.push('Apellidos'); if(!o.nombreTrab)e.push('Nombres'); if(!o.estab)e.push('Establecimiento'); return e}
 function guardarTrabajador(){let o=datosTrabajador(); let e=validarTrabajador(o); if(e.length){alert('Faltan campos: '+e.join(', ')); return} if(editIndex>=0){trabajadores[editIndex]=o; editIndex=-1}else trabajadores.push(o); persist(); borrarDatosEmpleado(); render()}
-function borrarDatosEmpleado(){fields.forEach(f=>{if(q(f)){ if(moneyFields.includes(f))q(f).value='0.00'; }}); ['idRet','apellidoTrab','nombreTrab'].forEach(f=>q(f).value=''); q('estab').value='001'; q('paisResidencia').value='593'; q('idDiscap').value='999'; q('tipoTrabajDiscap').value='01'; q('porcentajeDiscap').value='0'; editIndex=-1; showTab('id')}
+function borrarDatosEmpleado(){fields.forEach(f=>{if(q(f)){ if(moneyFields.includes(f))q(f).value='0.00'; }}); ['idRet','apellidoTrab','nombreTrab'].forEach(f=>q(f).value=''); q('estab').value='001'; q('paisResidencia').value='593'; q('idDiscap').value='999'; q('tipoTrabajDiscap').value='01'; q('porcentajeDiscap').value='0'; q('benefGalap').value='NO'; q('enfCatastrofica').value='NO'; q('numCargasFam').value='1'; q('aplicaConvenio').value='NO'; editIndex=-1; showTab('id')}
 function editar(i){let o=trabajadores[i]; fields.forEach(f=>{if(q(f))q(f).value=o[f]??''}); editIndex=i; window.scrollTo({top:120,behavior:'smooth'}); showTab('id')}
 function eliminar(i){if(confirm('¿Eliminar trabajador?')){trabajadores.splice(i,1); persist(); render()}}
 function persist(){localStorage.setItem('rdep_trabajadores',JSON.stringify(trabajadores)); localStorage.setItem('rdep_empleador',JSON.stringify({numRuc:val('numRuc'),anio:val('anio'),tipoEmpleador:val('tipoEmpleador'),enteSegSocial:val('enteSegSocial')}))}
@@ -212,8 +212,8 @@ function generarXML(descargar){
     xml+='      <empleado>\n';
     const empNodes = [
       ['benGalpg', t.benefGalap || 'NO'],
-      ['enfcatastro', t.enfCatastrofica || 'NO'],
-      ['numCargRebGastPers', t.numCargasFam || '0'],
+      ['enfcatastro', (t.enfCatastrofica==='SI'?'SI':'NO')],
+      ['numCargRebGastPers', String(Math.max(1, parseInt(t.numCargasFam||'1',10)||1))],
       ['tipIdRet', t.tipIdRet],
       ['idRet', t.idRet],
       ['apellidoTrab', t.apellidoTrab],
@@ -270,8 +270,8 @@ function cargarEjemplo(){
   q('tipIdDiscap').value='N';
   q('idDiscap').value='999';
   q('benefGalap').value='NO';
-  q('enfCatastrofica').value='00';
-  q('numCargasFam').value='0';
+  q('enfCatastrofica').value='NO';
+  q('numCargasFam').value='1';
   q('sueldosSalarios').value='475.00';
   q('sistemaSalarioNeto').value='0';
   q('aportePersIess').value='0.00';
@@ -284,7 +284,7 @@ function cargarEjemplo(){
   q('valRet').value='0.00';
   guardarTrabajador();
   generarXML(false);
-  alert('Datos de ejemplo cargados. Ahora puedes generar XML y probarlo en el validador.');
+  alert('Datos de ejemplo cargados con SI/NO y cargas familiares mínimo 1. Ahora puedes generar XML y probarlo en el validador.');
 }
 
 function descargarJSON(){persist(); let data={empleador:{numRuc:val('numRuc'),anio:val('anio'),tipoEmpleador:val('tipoEmpleador'),enteSegSocial:val('enteSegSocial')},trabajadores}; let a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})); a.download='respaldo_RDEP_'+val('anio')+'.json'; a.click(); URL.revokeObjectURL(a.href)}
