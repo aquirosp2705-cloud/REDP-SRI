@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Generador RDEP 2026 - Prueba SRI</title>
+<style>
+  :root{--bg:#f6f7fb;--card:#fff;--ink:#1f2937;--muted:#6b7280;--brand:#34495e;--accent:#2563eb;--bad:#b91c1c;--ok:#047857;--line:#e5e7eb}
+  *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:linear-gradient(135deg,#243447,#3b5872);color:#fff;padding:18px 16px} h1{margin:0;font-size:22px} h2{font-size:17px;margin:0 0 12px}
+  main{max-width:1180px;margin:auto;padding:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 10px #0000000d}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px} input,select,textarea{width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:9px;font-size:14px;background:#fff} textarea{min-height:110px;font-family:Consolas,monospace}
+  button{border:0;border-radius:10px;padding:10px 13px;font-weight:700;cursor:pointer;background:var(--brand);color:#fff;margin:4px 4px 4px 0} button.blue{background:var(--accent)} button.red{background:var(--bad)} button.green{background:var(--ok)} button.gray{background:#64748b}
+  .actions{display:flex;flex-wrap:wrap;gap:6px}.note{font-size:13px;color:var(--muted);line-height:1.35}.warn{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:10px;border-radius:10px;font-size:13px}
+  table{width:100%;border-collapse:collapse;font-size:13px} th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left} th{background:#f1f5f9} .right{text-align:right}.pill{display:inline-block;padding:3px 8px;border-radius:999px;background:#e0f2fe;color:#075985;font-size:12px}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.tab{background:#e5e7eb;color:#111827}.tab.active{background:var(--accent);color:#fff}.hidden{display:none}.small{font-size:12px}.total{font-weight:700;color:#111827}
+  @media(max-width:900px){.grid,.grid3,.grid2{grid-template-columns:1fr} table{font-size:12px} header{padding:14px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Generador XML RDEP 2026 · Versión inicial para validar en SRI</h1>
+  <div class="small">HTML + JavaScript · funciona sin servidor · listo para GitHub Pages</div>
+</header>
+<main>
+  <section class="card warn">
+    Esta versión genera un XML base para prueba en el programa/validador RDEP del SRI. Si el validador devuelve errores de etiqueta, longitud o catálogo, se corrige el HTML con esos mensajes hasta que quede compatible.
+  </section>
+
+  <section class="card">
+    <h2>1. Datos del empleador</h2>
+    <div class="grid">
+      <div><label>RUC empleador *</label><input id="numRuc" maxlength="13" placeholder="0999999999001"></div>
+      <div><label>Período fiscal *</label><input id="anio" value="2026" maxlength="4"></div>
+      <div><label>Tipo de empleador *</label><select id="tipoEmpleador"><option>PRIVADO_MIXTO</option><option>PUBLICO</option></select></div>
+      <div><label>Ente seguridad social *</label><select id="segSoc"><option>IESS</option><option>ISSFA_ISSPOL</option></select></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Trabajador</h2>
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('id')">Identificación</button>
+      <button class="tab" onclick="showTab('ing')">Ingresos</button>
+      <button class="tab" onclick="showTab('gas')">Gastos / Rebajas</button>
+      <button class="tab" onclick="showTab('imp')">Impuestos</button>
+    </div>
+
+    <div id="tab-id">
+      <div class="grid">
+        <div><label>Tipo ID *</label><select id="tipIdRet"><option value="C">Cédula</option><option value="P">Pasaporte</option><option value="E">Exterior</option></select></div>
+        <div><label>Número ID *</label><input id="idRet" placeholder="0912345678"></div>
+        <div><label>Apellidos *</label><input id="apellidoTrab"></div>
+        <div><label>Nombres *</label><input id="nombreTrab"></div>
+        <div><label>Establecimiento *</label><input id="estab" value="001" maxlength="3"></div>
+        <div><label>Residencia trabajador</label><select id="residenciaTrab"><option value="01">01 - Ecuador</option><option value="02">02 - Exterior</option></select></div>
+        <div><label>País residencia</label><input id="paisResidencia" value="593" maxlength="3"></div>
+        <div><label>Aplica convenio doble imposición</label><select id="aplicaConvenio"><option>NA</option><option>SI</option><option>NO</option></select></div>
+        <div><label>Condición discapacidad</label><input id="tipoTrabajDiscap" value="01" maxlength="2"></div>
+        <div><label>% discapacidad</label><input id="porcentajeDiscap" type="number" value="0" min="0"></div>
+        <div><label>Tipo ID sustituto</label><select id="tipIdDiscap"><option value="N">No aplica</option><option value="C">Cédula</option><option value="P">Pasaporte</option></select></div>
+        <div><label>ID sustituto discapacidad</label><input id="idDiscap" value="999"></div>
+        <div><label>Beneficio Galápagos</label><select id="benefGalap"><option value="NO">NO</option><option value="SI">SI</option></select></div>
+        <div><label>Enfermedad catastrófica/discapacidad cargo</label><select id="enfCatastrofica"><option value="00">00 - No</option><option value="01">01 - Sí</option></select></div>
+        <div><label>Cargas familiares</label><select id="numCargasFam"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      </div>
+    </div>
+
+    <div id="tab-ing" class="hidden">
+      <div class="grid">
+        <div><label>Sueldos y salarios</label><input id="sueldosSalarios" type="number" step="0.01" value="0"></div>
+        <div><label>Sobresueldos / comisiones</label><input id="sobreSuelComRemu" type="number" step="0.01" value="0"></div>
+        <div><label>Participación utilidades</label><input id="partUtil" type="number" step="0.01" value="0"></div>
+        <div><label>Ingresos otros empleadores</label><input id="ingGravOtrosEmpl" type="number" step="0.01" value="0"></div>
+        <div><label>Décimo tercero</label><input id="decimTer" type="number" step="0.01" value="0"></div>
+        <div><label>Décimo cuarto</label><input id="decimCuar" type="number" step="0.01" value="0"></div>
+        <div><label>Fondo reserva</label><input id="fondoReserva" type="number" step="0.01" value="0"></div>
+        <div><label>Compensación salario digno</label><input id="salarioDigno" type="number" step="0.01" value="0"></div>
+        <div><label>Otros ingresos no gravados</label><input id="otrosIngRenGrav" type="number" step="0.01" value="0"></div>
+        <div><label>Sistema salario neto</label><select id="sistemaSalarioNeto"><option value="0">0 - No aplica</option><option value="1">1 - Aplica</option></select></div>
+        <div><label>Aporte IESS este empleador</label><input id="aportePersIess" type="number" step="0.01" value="0"></div>
+        <div><label>Aporte IESS otros empleadores</label><input id="aportPersIessOtrosEmpls" type="number" step="0.01" value="0"></div>
+      </div>
+    </div>
+
+    <div id="tab-gas" class="hidden">
+      <div class="grid">
+        <div><label>Gastos vivienda</label><input id="deducVivienda" type="number" step="0.01" value="0"></div>
+        <div><label>Gastos salud</label><input id="deducSalud" type="number" step="0.01" value="0"></div>
+        <div><label>Gastos educación / arte / cultura</label><input id="deducEduca" type="number" step="0.01" value="0"></div>
+        <div><label>Gastos alimentación</label><input id="deducAliement" type="number" step="0.01" value="0"></div>
+        <div><label>Gastos vestimenta</label><input id="deducVestim" type="number" step="0.01" value="0"></div>
+        <div><label>Gastos turismo</label><input id="deducTurismo" type="number" step="0.01" value="0"></div>
+        <div><label>Exoneración discapacidad</label><input id="exoneraDisc" type="number" step="0.01" value="0"></div>
+        <div><label>Exoneración tercera edad</label><input id="exoneraTerEd" type="number" step="0.01" value="0"></div>
+      </div>
+    </div>
+
+    <div id="tab-imp" class="hidden">
+      <div class="grid">
+        <div><label>Base imponible gravada</label><input id="basImp" type="number" step="0.01" value="0"></div>
+        <div><label>Impuesto renta causado</label><input id="impRentCaus" type="number" step="0.01" value="0"></div>
+        <div><label>Rebaja gastos personales</label><input id="rebajaGastosPersonales" type="number" step="0.01" value="0"></div>
+        <div><label>IR después rebaja</label><input id="impRentaCausadoRebaja" type="number" step="0.01" value="0"></div>
+        <div><label>Retenido/asumido otros empleadores</label><input id="valorRetenidoOtrosEmpleadores" type="number" step="0.01" value="0"></div>
+        <div><label>IR asumido este empleador</label><input id="impAsumidoEsteEmpl" type="number" step="0.01" value="0"></div>
+        <div><label>IR retenido trabajador este empleador</label><input id="valRet" type="number" step="0.01" value="0"></div>
+      </div>
+      <div class="actions"><button class="gray" onclick="calcularBase()">Calcular base simple</button></div>
+    </div>
+
+    <div class="actions" style="margin-top:12px">
+      <button class="green" onclick="guardarTrabajador()">Agregar / actualizar trabajador</button>
+      <button class="gray" onclick="limpiarTrabajador()">Limpiar trabajador</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>3. Trabajadores ingresados <span id="count" class="pill">0</span></h2>
+    <div style="overflow:auto"><table id="tabla"><thead><tr><th>ID</th><th>Trabajador</th><th class="right">Ingresos gravados</th><th class="right">Base imponible</th><th class="right">IR retenido</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="card">
+    <h2>4. Generar y respaldar</h2>
+    <div class="actions">
+      <button class="blue" onclick="generarXML(true)">Generar XML y descargar</button>
+      <button onclick="generarXML(false)">Ver XML</button>
+      <button class="green" onclick="descargarJSON()">Respaldar datos JSON</button>
+      <button class="gray" onclick="document.getElementById('importFile').click()">Restaurar JSON</button>
+      <button class="red" onclick="borrarTodo()">Borrar todo</button>
+      <input id="importFile" type="file" accept=".json" style="display:none" onchange="importarJSON(event)">
+    </div>
+    <p class="note">Para el SRI: descarga el XML, comprímelo en ZIP y pruébalo en el programa/validador RDEP 2026. Guarda la captura o copia los errores para ajustar la estructura.</p>
+    <textarea id="xmlOut" placeholder="Aquí se verá el XML generado..."></textarea>
+  </section>
+</main>
+<script>
+const moneyFields=['sueldosSalarios','sobreSuelComRemu','partUtil','ingGravOtrosEmpl','decimTer','decimCuar','fondoReserva','salarioDigno','otrosIngRenGrav','aportePersIess','aportPersIessOtrosEmpls','deducVivienda','deducSalud','deducEduca','deducAliement','deducVestim','deducTurismo','exoneraDisc','exoneraTerEd','basImp','impRentCaus','rebajaGastosPersonales','impRentaCausadoRebaja','valorRetenidoOtrosEmpleadores','impAsumidoEsteEmpl','valRet'];
+const fields=['tipIdRet','idRet','apellidoTrab','nombreTrab','estab','residenciaTrab','paisResidencia','aplicaConvenio','tipoTrabajDiscap','porcentajeDiscap','tipIdDiscap','idDiscap','benefGalap','enfCatastrofica','numCargasFam','sistemaSalarioNeto',...moneyFields];
+let trabajadores=JSON.parse(localStorage.getItem('rdep_trabajadores')||'[]'); let editIndex=-1;
+function q(id){return document.getElementById(id)}
+function val(id){return (q(id)?.value||'').trim()}
+function num(id){let n=parseFloat(val(id)); return isNaN(n)?0:n}
+function money(n){n=parseFloat(n); if(isNaN(n)||n<0)n=0; return n.toFixed(2)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[m]))}
+function tag(k,v){return `    <${k}>${esc(v)}</${k}>`}
+function showTab(name){['id','ing','gas','imp'].forEach(t=>{q('tab-'+t).classList.toggle('hidden',t!==name)});document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',['id','ing','gas','imp'][i]===name))}
+function calcularBase(){let ing=num('sueldosSalarios')+num('sobreSuelComRemu')+num('partUtil')+num('ingGravOtrosEmpl');q('basImp').value=money(ing-num('aportePersIess')-num('aportPersIessOtrosEmpls'));}
+function datosTrabajador(){let o={}; fields.forEach(f=>o[f]=moneyFields.includes(f)?money(num(f)):val(f)); o.ingGravConEsteEmpl=money(num('sueldosSalarios')+num('sobreSuelComRemu')+num('partUtil')); return o}
+function validarTrabajador(o){let e=[]; if(!o.idRet)e.push('Número ID'); if(!o.apellidoTrab)e.push('Apellidos'); if(!o.nombreTrab)e.push('Nombres'); if(!o.estab)e.push('Establecimiento'); return e}
+function guardarTrabajador(){let o=datosTrabajador(); let e=validarTrabajador(o); if(e.length){alert('Faltan campos: '+e.join(', ')); return} if(editIndex>=0){trabajadores[editIndex]=o; editIndex=-1}else trabajadores.push(o); persist(); limpiarTrabajador(); render()}
+function limpiarTrabajador(){fields.forEach(f=>{if(q(f)){ if(moneyFields.includes(f))q(f).value='0.00'; }}); ['idRet','apellidoTrab','nombreTrab'].forEach(f=>q(f).value=''); q('estab').value='001'; q('paisResidencia').value='593'; q('idDiscap').value='999'; q('tipoTrabajDiscap').value='01'; q('porcentajeDiscap').value='0'; editIndex=-1; showTab('id')}
+function editar(i){let o=trabajadores[i]; fields.forEach(f=>{if(q(f))q(f).value=o[f]??''}); editIndex=i; window.scrollTo({top:120,behavior:'smooth'}); showTab('id')}
+function eliminar(i){if(confirm('¿Eliminar trabajador?')){trabajadores.splice(i,1); persist(); render()}}
+function persist(){localStorage.setItem('rdep_trabajadores',JSON.stringify(trabajadores)); localStorage.setItem('rdep_empleador',JSON.stringify({numRuc:val('numRuc'),anio:val('anio'),tipoEmpleador:val('tipoEmpleador'),segSoc:val('segSoc')}))}
+function render(){q('count').textContent=trabajadores.length; let tb=q('tabla').querySelector('tbody'); tb.innerHTML=''; trabajadores.forEach((t,i)=>{tb.insertAdjacentHTML('beforeend',`<tr><td>${esc(t.idRet)}</td><td>${esc(t.apellidoTrab)} ${esc(t.nombreTrab)}</td><td class="right">${money(t.ingGravConEsteEmpl)}</td><td class="right">${money(t.basImp)}</td><td class="right">${money(t.valRet)}</td><td><button class="gray" onclick="editar(${i})">Editar</button><button class="red" onclick="eliminar(${i})">Eliminar</button></td></tr>`)}); persist()}
+function generarXML(descargar){persist(); if(!val('numRuc')||val('numRuc').length!==13){alert('Revisa el RUC: debe tener 13 dígitos.');return} if(!trabajadores.length){alert('Agrega al menos un trabajador.');return}
+let xml=`<?xml version="1.0" encoding="UTF-8"?>\n<rdep>\n  <numRuc>${esc(val('numRuc'))}</numRuc>\n  <anio>${esc(val('anio'))}</anio>\n  <tipoEmpleador>${esc(val('tipoEmpleador'))}</tipoEmpleador>\n  <segSoc>${esc(val('segSoc'))}</segSoc>\n  <retRelDep>\n`;
+trabajadores.forEach(t=>{xml+='  <datRetRelDep>\n';
+['benefGalap','enfCatastrofica','numCargasFam','tipIdRet','idRet','apellidoTrab','nombreTrab','estab','residenciaTrab','paisResidencia','aplicaConvenio','tipoTrabajDiscap','porcentajeDiscap','tipIdDiscap','idDiscap','sueldosSalarios','sobreSuelComRemu','partUtil','ingGravOtrosEmpl','impAsumidoEsteEmpl','decimTer','decimCuar','fondoReserva','salarioDigno','otrosIngRenGrav','ingGravConEsteEmpl','sistemaSalarioNeto','aportePersIess','aportPersIessOtrosEmpls','deducVivienda','deducSalud','deducEduca','deducAliement','deducVestim','deducTurismo','exoneraDisc','exoneraTerEd','basImp','impRentCaus','rebajaGastosPersonales','impRentaCausadoRebaja','valorRetenidoOtrosEmpleadores','valRet'].forEach(k=>xml+=tag(k,t[k]??'0')+'\n');
+// Campos de contribución solidaria 2016: se envían en cero para evitar vacíos cuando el esquema los conserva.
+['ingEsteEmplContri','ingOtrosEmplContri','exoContri','totIngContri','numMesTrabEsteEmplContri','numMesTrabOtrosEmplContri','numMesTrabContri','ingMensPromContri','numMesContriGenOtrosEmpl','numMesContriGenEsteEmpl','numMesContriGen','totContriGen','credTribDonContrOtrosEmpl','credTribDonContrEsteEmpl','credTribDonContrNoUtilEsteEmpl','credTribDonContr','contriPagar','contriAsumOtrosEmpl','contriRetenOtrosEmpl','contriAsumEsteEmpl','contriRetenEsteEmpl'].forEach(k=>xml+=tag(k,'0.00')+'\n');
+xml+='  </datRetRelDep>\n'}); xml+='  </retRelDep>\n</rdep>';
+q('xmlOut').value=xml; if(descargar){let blob=new Blob([xml],{type:'application/xml;charset=utf-8'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='RDEP_'+val('anio')+'.xml'; a.click(); URL.revokeObjectURL(a.href)} }
+function descargarJSON(){persist(); let data={empleador:{numRuc:val('numRuc'),anio:val('anio'),tipoEmpleador:val('tipoEmpleador'),segSoc:val('segSoc')},trabajadores}; let a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})); a.download='respaldo_RDEP_'+val('anio')+'.json'; a.click(); URL.revokeObjectURL(a.href)}
+function importarJSON(ev){let f=ev.target.files[0]; if(!f)return; let r=new FileReader(); r.onload=()=>{try{let d=JSON.parse(r.result); if(d.empleador){Object.keys(d.empleador).forEach(k=>{if(q(k))q(k).value=d.empleador[k]})} trabajadores=d.trabajadores||[]; persist(); render(); alert('Datos restaurados.')}catch(e){alert('No se pudo leer el respaldo JSON.')}}; r.readAsText(f)}
+function borrarTodo(){if(confirm('¿Borrar todos los datos guardados?')){trabajadores=[]; localStorage.removeItem('rdep_trabajadores'); localStorage.removeItem('rdep_empleador'); q('xmlOut').value=''; render()}}
+(function init(){let emp=JSON.parse(localStorage.getItem('rdep_empleador')||'{}'); Object.keys(emp).forEach(k=>{if(q(k))q(k).value=emp[k]}); render(); limpiarTrabajador();})();
+</script>
+</body>
+</html>
