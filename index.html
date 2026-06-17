@@ -18,15 +18,99 @@
   .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.tab{background:#e5e7eb;color:#111827}.tab.active{background:var(--accent);color:#fff}.hidden{display:none}.small{font-size:12px}.total{font-weight:700;color:#111827}
   @media(max-width:900px){.grid,.grid3,.grid2{grid-template-columns:1fr} table{font-size:12px} header{padding:14px}}
 </style>
+
+<style id="v8-brand-xml-styles">
+.app-brand{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,#10243f,#1f4b7a);color:#fff;text-align:center;padding:18px 12px 16px;box-shadow:0 4px 14px rgba(0,0,0,.18);border-bottom:4px solid rgba(255,255,255,.22)}
+.app-brand .brand-title{font-size:clamp(24px,4vw,38px);font-weight:800;letter-spacing:.08em}
+.app-brand .brand-subtitle{font-size:clamp(16px,2.4vw,22px);font-weight:700;margin-top:4px}
+.app-brand .brand-author,.app-brand .brand-email,.app-brand .brand-phone,.app-brand .brand-rights{font-size:14px;line-height:1.35}
+.app-brand .brand-author{margin-top:10px;font-weight:700}.app-brand .brand-email{font-weight:600}.app-brand .brand-rights{opacity:.9;margin-top:4px}
+#xmlPreview,textarea#xmlPreview,pre#xmlPreview,.xml-preview,textarea.xml-preview,pre.xml-preview,#salidaXML,textarea#salidaXML,pre#salidaXML,#xmlOutput,textarea#xmlOutput,pre#xmlOutput,textarea[id*="xml" i],pre[id*="xml" i]{width:100%!important;min-height:760px!important;max-height:82vh!important;font-family:Consolas,"Courier New",monospace!important;font-size:14px!important;line-height:1.45!important;white-space:pre-wrap!important;overflow:auto!important;box-sizing:border-box!important}
+.modal,.xml-modal,#modalXML,#xmlModal{width:95vw!important;max-width:1400px!important}
+.modal-content,.xml-modal-content,#modalXML .modal-content,#xmlModal .modal-content{width:95vw!important;max-width:1400px!important;max-height:92vh!important}
+.fullscreen-xml{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;z-index:9999!important;background:#fff!important;padding:16px!important;box-sizing:border-box!important}
+.fullscreen-xml textarea,.fullscreen-xml pre{min-height:calc(100vh - 110px)!important;max-height:calc(100vh - 110px)!important}
+.xml-tools-v8{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0;align-items:center}
+.xml-tools-v8 button{padding:10px 14px;border:0;border-radius:10px;cursor:pointer;font-weight:700}.xml-tools-v8 .primary{background:#1f4b7a;color:#fff}.xml-tools-v8 .secondary{background:#eef3f8;color:#10243f}
+</style>
+
+
+<style id="v9-header-xml-styles">
+.titulo-principal-v9{
+  display:block !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+  background:linear-gradient(135deg,#0b1f36,#1d4f82) !important;
+  color:#ffffff !important;
+  text-align:center !important;
+  padding:22px 12px 20px !important;
+  margin:0 0 22px 0 !important;
+  border-bottom:5px solid #d7e6f5 !important;
+  box-shadow:0 4px 18px rgba(0,0,0,.22) !important;
+  position:relative !important;
+  z-index:999 !important;
+}
+.titulo-principal-v9 .titulo-rdep{
+  font-size:clamp(28px,5vw,44px) !important;
+  font-weight:900 !important;
+  letter-spacing:.08em !important;
+  line-height:1.1 !important;
+}
+.titulo-principal-v9 .subtitulo-rdep{
+  font-size:clamp(17px,2.8vw,24px) !important;
+  font-weight:700 !important;
+  margin-top:6px !important;
+}
+.titulo-principal-v9 .autor-rdep{
+  font-size:16px !important;
+  font-weight:700 !important;
+  margin-top:12px !important;
+}
+.titulo-principal-v9 .correo-rdep,
+.titulo-principal-v9 .cel-rdep,
+.titulo-principal-v9 .derechos-rdep{
+  font-size:14px !important;
+  font-weight:600 !important;
+  line-height:1.45 !important;
+}
+.titulo-principal-v9 .derechos-rdep{
+  opacity:.92 !important;
+  margin-top:4px !important;
+}
+
+/* Ventana XML amplia */
+#xmlPreview,textarea#xmlPreview,pre#xmlPreview,.xml-preview,textarea.xml-preview,pre.xml-preview,#salidaXML,textarea#salidaXML,pre#salidaXML,#xmlOutput,textarea#xmlOutput,pre#xmlOutput,textarea[id*="xml" i],pre[id*="xml" i]{
+  width:100% !important;
+  min-height:780px !important;
+  max-height:84vh !important;
+  font-family:Consolas,"Courier New",monospace !important;
+  font-size:14px !important;
+  line-height:1.45 !important;
+  white-space:pre-wrap !important;
+  overflow:auto !important;
+  box-sizing:border-box !important;
+}
+</style>
+
 </head>
 <body>
+
+<div class="titulo-principal-v9">
+  <div class="titulo-rdep">RDEP PARA SRI</div>
+  <div class="subtitulo-rdep">Generador de archivo XML</div>
+  <div class="autor-rdep">By Ing. Alexandra Quiros P.</div>
+  <div class="correo-rdep">confipres.ec@gmail.com</div>
+  <div class="cel-rdep">Cel. 0992213560</div>
+  <div class="derechos-rdep">© Derechos Reservados 2026</div>
+</div>
+
 <header>
-  <h1>Generador XML RDEP 2026 · Versión v7 para pruebas en validador SRI</h1>
-  <div class="small">HTML + JavaScript · funciona sin servidor · listo para GitHub Pages</div>
+  <h1>RDEP PARA SRI</h1>
+  <div class="small">Generador de archivo XML</div>
 </header>
 <main>
   <section class="card warn">
-    Versión v7 para pruebas. Incluye datos de ejemplo, limpieza separada de empleador y empleado, y generación XML para iterar con los errores del validador SRI. El XML anterior fue rechazado; por eso esta herramienta debe ajustarse con cada mensaje del validador hasta que sea aceptada.
+    Versión v10 para pruebas. Incluye datos de ejemplo, limpieza separada de empleador y empleado, y generación XML para iterar con los errores del validador SRI. El XML anterior fue rechazado; por eso esta herramienta debe ajustarse con cada mensaje del validador hasta que sea aceptada.
   </section>
 
   <section class="card">
@@ -326,5 +410,38 @@ function importarJSON(ev){let f=ev.target.files[0]; if(!f)return; let r=new File
 function borrarTodo(){if(confirm('¿Borrar todos los datos guardados?')){trabajadores=[]; localStorage.removeItem('rdep_trabajadores'); localStorage.removeItem('rdep_empleador'); borrarDatosEmpleador(); borrarDatosEmpleado(); q('xmlOut').value=''; render()}}
 (function init(){let emp=JSON.parse(localStorage.getItem('rdep_empleador')||'{}'); Object.keys(emp).forEach(k=>{if(q(k))q(k).value=emp[k]}); render(); borrarDatosEmpleado();})();
 </script>
+
+<script id="v8-xml-tools-script">
+function v8FindXmlBox(){
+  return document.getElementById('xmlPreview') ||
+         document.getElementById('salidaXML') ||
+         document.getElementById('xmlOutput') ||
+         document.querySelector('textarea.xml-preview, pre.xml-preview, textarea[id*="xml" i], pre[id*="xml" i]');
+}
+function v8TogglePantallaCompletaXML(){
+  const box = v8FindXmlBox();
+  if(!box){ alert('Primero genera o visualiza el XML.'); return; }
+  const container = box.closest('.modal-content') || box.closest('.card') || box.parentElement;
+  if(container) container.classList.toggle('fullscreen-xml');
+}
+function v8CopiarXML(){
+  const box = v8FindXmlBox();
+  if(!box){ alert('Primero genera el XML.'); return; }
+  const txt = box.value !== undefined ? box.value : box.textContent;
+  navigator.clipboard.writeText(txt).then(()=>alert('XML copiado al portapapeles.'));
+}
+function v8AgregarBotonesXML(){
+  const box = v8FindXmlBox();
+  if(!box || document.getElementById('xmlToolsV8')) return;
+  const tools = document.createElement('div');
+  tools.id = 'xmlToolsV8';
+  tools.className = 'xml-tools-v8';
+  tools.innerHTML = '<button type="button" class="primary" onclick="v8CopiarXML()">Copiar XML</button><button type="button" class="secondary" onclick="v8TogglePantallaCompletaXML()">Pantalla completa</button>';
+  box.parentNode.insertBefore(tools, box);
+}
+document.addEventListener('click',()=>setTimeout(v8AgregarBotonesXML,150));
+document.addEventListener('DOMContentLoaded',()=>setTimeout(v8AgregarBotonesXML,400));
+</script>
+
 </body>
 </html>
