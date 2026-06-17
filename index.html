@@ -1,9 +1,9 @@
-
 <!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-store" />
 <title>Generador RDEP 2026 - Prueba SRI</title>
 <style>
   :root{--bg:#f6f7fb;--card:#fff;--ink:#1f2937;--muted:#6b7280;--brand:#34495e;--accent:#2563eb;--bad:#b91c1c;--ok:#047857;--line:#e5e7eb}
@@ -21,12 +21,12 @@
 </head>
 <body>
 <header>
-  <h1>Generador XML RDEP 2026 · Versión v5 para pruebas en validador SRI</h1>
+  <h1>Generador XML RDEP 2026 · Versión v7 para pruebas en validador SRI</h1>
   <div class="small">HTML + JavaScript · funciona sin servidor · listo para GitHub Pages</div>
 </header>
 <main>
   <section class="card warn">
-    Versión v5 para pruebas. Incluye datos de ejemplo, limpieza separada de empleador y empleado, y generación XML para iterar con los errores del validador SRI. El XML anterior fue rechazado; por eso esta herramienta debe ajustarse con cada mensaje del validador hasta que sea aceptada.
+    Versión v7 para pruebas. Incluye datos de ejemplo, limpieza separada de empleador y empleado, y generación XML para iterar con los errores del validador SRI. El XML anterior fue rechazado; por eso esta herramienta debe ajustarse con cada mensaje del validador hasta que sea aceptada.
   </section>
 
   <section class="card">
@@ -118,6 +118,7 @@
     <div class="actions" style="margin-top:12px">
       <button class="green" onclick="guardarTrabajador()">Agregar / actualizar trabajador</button>
       <button class="gray" onclick="borrarDatosEmpleado()">Borrar datos de empleado</button>
+      <button class="blue" onclick="repararTrabajadoresGuardados()">Reparar empleados guardados</button>
     </div>
   </section>
 
@@ -149,10 +150,40 @@ function val(id){return (q(id)?.value||'').trim()}
 function num(id){let n=parseFloat(val(id)); return isNaN(n)?0:n}
 function money(n){n=parseFloat(n); if(isNaN(n)||n<0)n=0; return n.toFixed(2)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[m]))}
+function siNo(v, def='NO'){
+  v = String(v ?? '').trim().toUpperCase();
+  return (v === 'SI' || v === 'S') ? 'SI' : (v === 'NO' || v === 'N') ? 'NO' : def;
+}
+function enteroMin(v, min=1){
+  let n = parseInt(String(v ?? '').trim(), 10);
+  if (isNaN(n) || n < min) n = min;
+  return String(n);
+}
+function codigoSisSalNet(v){
+  v = String(v ?? '').trim();
+  return (v === '2') ? '2' : '1';
+}
+function normalizarTrabajador(t){
+  t = t || {};
+  t.benefGalap = siNo(t.benefGalap, 'NO');
+  t.enfCatastrofica = siNo(t.enfCatastrofica, 'NO');
+  t.numCargasFam = enteroMin(t.numCargasFam, 1);
+  t.sistemaSalarioNeto = codigoSisSalNet(t.sistemaSalarioNeto);
+  if(!['SI','NO'].includes(String(t.aplicaConvenio||'').toUpperCase())) t.aplicaConvenio = 'NO';
+  return t;
+}
+function repararTrabajadoresGuardados(){
+  trabajadores = trabajadores.map(normalizarTrabajador);
+  persist();
+  render();
+  generarXML(false);
+  alert('Empleados guardados reparados: enfcatastro SI/NO, cargas mínimo 1 y sisSalNet mínimo 1.');
+}
+
 function tag(k,v){return `    <${k}>${esc(v)}</${k}>`}
 function showTab(name){['id','ing','gas','imp'].forEach(t=>{q('tab-'+t).classList.toggle('hidden',t!==name)});document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',['id','ing','gas','imp'][i]===name))}
 function calcularBase(){let ing=num('sueldosSalarios')+num('sobreSuelComRemu')+num('partUtil')+num('ingGravOtrosEmpl');q('basImp').value=money(ing-num('aportePersIess')-num('aportPersIessOtrosEmpls'));}
-function datosTrabajador(){let o={}; fields.forEach(f=>o[f]=moneyFields.includes(f)?money(num(f)):val(f)); o.ingGravConEsteEmpl=money(num('sueldosSalarios')+num('sobreSuelComRemu')+num('partUtil')); return o}
+function datosTrabajador(){let o={}; fields.forEach(f=>o[f]=moneyFields.includes(f)?money(num(f)):val(f)); o.ingGravConEsteEmpl=money(num('sueldosSalarios')+num('sobreSuelComRemu')+num('partUtil')); return normalizarTrabajador(o)}
 function validarTrabajador(o){let e=[]; if(!o.idRet)e.push('Número ID'); if(!o.apellidoTrab)e.push('Apellidos'); if(!o.nombreTrab)e.push('Nombres'); if(!o.estab)e.push('Establecimiento'); return e}
 function guardarTrabajador(){let o=datosTrabajador(); let e=validarTrabajador(o); if(e.length){alert('Faltan campos: '+e.join(', ')); return} if(editIndex>=0){trabajadores[editIndex]=o; editIndex=-1}else trabajadores.push(o); persist(); borrarDatosEmpleado(); render()}
 function borrarDatosEmpleado(){fields.forEach(f=>{if(q(f)){ if(moneyFields.includes(f))q(f).value='0.00'; }}); ['idRet','apellidoTrab','nombreTrab'].forEach(f=>q(f).value=''); q('estab').value='001'; q('paisResidencia').value='593'; q('idDiscap').value='999'; q('tipoTrabajDiscap').value='01'; q('porcentajeDiscap').value='0'; q('benefGalap').value='NO'; q('enfCatastrofica').value='NO'; q('numCargasFam').value='1'; q('aplicaConvenio').value='NO'; editIndex=-1; showTab('id')}
@@ -164,6 +195,8 @@ function generarXML(descargar){
   persist();
   if(!val('numRuc')||val('numRuc').length!==13){alert('Revisa el RUC: debe tener 13 dígitos.');return}
   if(!trabajadores.length){alert('Agrega al menos un trabajador.');return}
+  trabajadores = trabajadores.map(normalizarTrabajador);
+  persist();
 
   // Estructura corregida según errores del validador:
   // rdep -> numRuc, anio, tipoEmpleador, enteSegSocial, retRelDep
@@ -212,9 +245,9 @@ function generarXML(descargar){
     xml+='    <datRetRelDep>\n';
     xml+='      <empleado>\n';
     const empNodes = [
-      ['benGalpg', t.benefGalap || 'NO'],
-      ['enfcatastro', (t.enfCatastrofica==='SI'?'SI':'NO')],
-      ['numCargRebGastPers', String(Math.max(1, parseInt(t.numCargasFam||'1',10)||1))],
+      ['benGalpg', siNo(t.benefGalap, 'NO')],
+      ['enfcatastro', siNo(t.enfCatastrofica, 'NO')],
+      ['numCargRebGastPers', enteroMin(t.numCargasFam, 1)],
       ['tipIdRet', t.tipIdRet],
       ['idRet', t.idRet],
       ['apellidoTrab', t.apellidoTrab],
@@ -222,7 +255,7 @@ function generarXML(descargar){
       ['estab', t.estab || '001'],
       ['residenciaTrab', t.residenciaTrab || '01'],
       ['paisResidencia', t.paisResidencia || '593'],
-      ['aplicaConvenio', t.aplicaConvenio || 'NA'],
+      ['aplicaConvenio', siNo(t.aplicaConvenio, 'NO')],
       ['tipoTrabajDiscap', t.tipoTrabajDiscap || '01'],
       ['porcentajeDiscap', String(parseInt(t.porcentajeDiscap||0,10)||0)],
       ['tipIdDiscap', t.tipIdDiscap || 'N'],
@@ -274,7 +307,7 @@ function cargarEjemplo(){
   q('enfCatastrofica').value='NO';
   q('numCargasFam').value='1';
   q('sueldosSalarios').value='475.00';
-  q('sistemaSalarioNeto').value='0';
+  q('sistemaSalarioNeto').value='1';
   q('aportePersIess').value='0.00';
   q('basImp').value='0.00';
   q('impRentCaus').value='0.00';
@@ -285,7 +318,7 @@ function cargarEjemplo(){
   q('valRet').value='0.00';
   guardarTrabajador();
   generarXML(false);
-  alert('Datos de ejemplo cargados con SI/NO y cargas familiares mínimo 1. Ahora puedes generar XML y probarlo en el validador.');
+  alert('Datos de ejemplo cargados. La V7 fuerza enfcatastro SI/NO, cargas familiares mínimo 1 y sisSalNet = 1 al generar XML.');
 }
 
 function descargarJSON(){persist(); let data={empleador:{numRuc:val('numRuc'),anio:val('anio'),tipoEmpleador:val('tipoEmpleador'),enteSegSocial:val('enteSegSocial')},trabajadores}; let a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})); a.download='respaldo_RDEP_'+val('anio')+'.json'; a.click(); URL.revokeObjectURL(a.href)}
